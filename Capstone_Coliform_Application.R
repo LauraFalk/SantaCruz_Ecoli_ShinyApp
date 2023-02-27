@@ -32,7 +32,7 @@ sysDate1 <- now(tz = 'America/Phoenix')
 
 # T Min
 get.Tmin <- function(sysDate) {
-  formattedEndYear <- as.numeric(format(sysDate, "%Y"))
+  formattedEndYear <- as.numeric(format(sysDate1, "%Y"))
   TMin <- climateAnalyzeR::import_data("daily_wx"
                                        , station_id = 'KA7WSB-1'
                                        , start_year = formattedEndYear-1
@@ -41,7 +41,7 @@ get.Tmin <- function(sysDate) {
   
   Var_TMin <- as.numeric(unlist(TMin %>%
                                   mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate) - 2) %>%
+                                  subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
                                   select(tmin_f)))
 }
 
