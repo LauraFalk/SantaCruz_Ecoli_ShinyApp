@@ -6,6 +6,7 @@
 ###################
 
 ##Dist from Sonoita is within the mapping layer
+library(dplyr)
 
 spatiallocs <- read_xls("Data/SantaCruzLocs.xls")
 spatiallocs <- spatiallocs %>%

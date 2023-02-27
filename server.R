@@ -12,7 +12,7 @@ server <- function(input, output, session) {
   
   #map
   
-  output$mymap <- renderLeaflet({
+  output$mymap <- leaflet::renderLeaflet({
     leaflet(points) %>% 
       addProviderTiles(providers$Esri.NatGeoWorldMap,
                        options = providerTileOptions(noWrap = TRUE)) %>%

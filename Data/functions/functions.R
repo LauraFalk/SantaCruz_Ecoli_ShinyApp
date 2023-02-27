@@ -6,7 +6,8 @@
 ###################
 
 # Use the lubridate package to retrieve UTC rather than sysTime
-sysDate1 <- now(tz = 'America/Phoenix')
+sysDate1 <- lubridate::now(tz = 'America/Phoenix')
+library(dplyr)
 
 # T Min
 get.Tmin <- function(sysDate) {
