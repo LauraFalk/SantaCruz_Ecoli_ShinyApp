@@ -13,6 +13,7 @@ library(ggplot2)
 library(janitor)
 library(knitr)
 library(leaflet)
+library(leaflegend)
 library(lubridate)
 library(mapview)
 library(readxl)
@@ -148,7 +149,6 @@ get.NinXTS <- function(sysDate) {
 Var_NinXTS <- get.NinXTS(sysDate1)
 
 
-# Time of Day
 #modified from https://stackoverflow.com/questions/49370387/convert-time-object-to-categorical-morning-afternoon-evening-night-variable
 
 get.TOD <- function(sysTime) {
@@ -160,7 +160,9 @@ get.TOD <- function(sysTime) {
   Var_TOD <- c(4, 1, 2, 3, 4)[as.numeric(currenttime)]
 }
 
+
 Var_TOD <- get.TOD(sysDate1)
+
 
 # Dist from Sonoita is within the mapping layer
 
@@ -181,14 +183,14 @@ predictionDF <- predictionDF %>%
   select(PreviousTmin, Discharge_CFS, Stage, NinXTS, TOD, DistFromSonoita)
 
 DisplayDF <- predictionDF %>%
-  select(-DistFromSonoita)%>%
+  select(-DistFromSonoita,-TOD)%>%
   distinct()
 
 # Run the model for 235
 XGBModel <- xgb.load('Data/XGBmodel235')
 predictionDM <- data.matrix(predictionDF)
 pred <- predict(XGBModel,predictionDM)
-pred <-  as.numeric(pred > 0.4)
+pred <-  as.numeric(pred > 0.45)
 spatiallocs$pred235 <- c(pred)
 #spatiallocs$pred235 <- ifelse(spatiallocs$pred235 > 0, "Bacteria Level >235  Likely", "High Bacteria levels > 235 not predicted")
 
@@ -196,7 +198,7 @@ spatiallocs$pred235 <- c(pred)
 # Run the model for 575
 XGBModel <- xgb.load('Data/XGBmodel575')
 pred <- predict(XGBModel,predictionDM)
-pred <-  as.numeric(pred > 0.4)
+pred <-  as.numeric(pred > 0.45)
 spatiallocs$pred575 <- c(pred)
 #spatiallocs$pred575 <- ifelse(spatiallocs$pred575 > 0, "Bacteria Level >575 Likely", "High Bacteria levels > 575 not predicted")
 
@@ -206,9 +208,9 @@ spatiallocs$pred575 <- c(pred)
 points <- spatiallocs %>%
   select(Lat,Long,DistCatego,pred235, pred575) %>%
   mutate(pointcolor = (pred235+pred575*3)) %>%
-  mutate(pointlegend = ifelse(pointcolor > 1 ,">575 MPN likely",(ifelse(pointcolor=1,">235 MPN likely","<235 MPN likely"))))
+  mutate(pointlegend = ifelse(pointcolor > 1 ,">575 MPN likely",(ifelse(pointcolor==1,">235 MPN likely","<235 MPN likely")))) 
 
-factpal <- colorFactor(topo.colors(3), points$pointlegend)
+
 ### Shiny UI ##################################################################
 
 # Define UI for application that draws a histogram
@@ -217,27 +219,40 @@ ui <- fluidPage(
   # Application title
   titlePanel("E. coli Prediction: Upper Santa Cruz River"),
   
-  sidebarPanel(" LAURA FIGURE OUT HOW TO FORMAT THIS
+  sidebarPanel(markdown("LAURA FIGURE OUT HOW TO FORMAT THIS
   
   This tool is intended to predict Escherichia coli (E. coli) levels
                in the Upper Santa Cruz River using a model trained on sampling data
                collected after the 2009 upgrade of the Nogales International Wastewater Treatment Plant.
                
                Variables were as follows:
-               PreviousTMin - Minimum temperature from 2 days prior from KA7WSB-1 weather station upload on ClimateAnalyzer.org
+               - PreviousTMin - Minimum temperature from 2 days prior from KA7WSB-1 weather station upload on ClimateAnalyzer.org
                Discharge_CFS - Current (within last 5 minute) discharge reading from the USGS gage 09481740,
                Stage - Categorical classification of current trend from USGS gage 09481740 (Low Flow, Base flow, High and Rising Flow, High and Falling Flow)),
                NinXTS - Current (or most recent) Oceanic Nino Index from NOAA
                TOD - Categorical quartile classification of time of day,
                DistFromSonoita - Categorical distance classification from the Rio Sonoita Inputs"
-               ),
+               )),
   mainPanel(
-    fluidRow(
-      column(12,
-             tableOutput('table')
-      )),
+    
+    
+    
     fluidPage(
-      leafletOutput("mymap"))
+      h3("Current Time in Santa Cruz County:"),
+      
+      h4(textOutput("currentTime", container = span)
+      ),
+      h3("Current Conditions: "
+      ),
+      fluidRow(
+        column(12,
+               tableOutput('table')
+        )),
+      
+      h3("Current Predictions: "
+      ),
+      leafletOutput("mymap")
+      )
     )
       )
 
@@ -251,15 +266,27 @@ server <- function(input, output, session) {
   #map
   
   output$mymap <- renderLeaflet({
-    leaflet() %>%
+    leaflet(points) %>% 
       addProviderTiles(providers$Esri.NatGeoWorldMap,
-                       options = providerTileOptions(noWrap = TRUE)
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addCircleMarkers(
+        color = ifelse(points$pointcolor > 1 ,"red",(ifelse(points$pointcolor==1,"yellow","navy"))) ,
+        stroke = FALSE, fillOpacity = 0.6,
+        label = points$pointlegend
       ) %>%
-      addCircleMarkers(data = points,fillColor = ~factpal(pointlegend))%>%
-      addLegend("bottomright", pal = factpal, values = points$pointlegend,
-                title = "Legend Not Working and I Need a Break")
-  })
+      addLegend(values = c("red", "yellow", "navy"), 
+                colors = c("red", "yellow", "navy"), 
+                labels = c("Does Not Meet Partial Body Contact Standard (>575 MPN)",
+                           "Does Not Meet Full Body Contact Standard (>235 MPN)",
+                           "Meets Arizona Body Contact Standards <235 MPN"), 
+                position = 'bottomright')
+    
   
+
+  })
+  output$currentTime <- renderText({
+    format(sysDate1) 
+  })
 }
 
 
