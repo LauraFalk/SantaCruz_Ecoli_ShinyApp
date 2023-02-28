@@ -23,10 +23,10 @@ library(climateAnalyzeR)
 
 
 #Load components
-source('ui.R')
-source('server.R')
-source(list.files('Data/functions', full.names = TRUE))
-source('Data/calculations.R')
+source('App/ui.R')
+source('App/server.R')
+source(list.files('App/functions', full.names = TRUE))
+source('App/calculations.R')
 
 #Run the app
 shinyApp(ui, server)
