@@ -11,13 +11,8 @@ ui <- navbarPage(
   theme = bslib::bs_theme(version = 4, bootswatch = "litera"), #https://bootswatch.com/
   # Application title
   div(h3(em("E. coli"), "prediction", style="margin: 0;"), h6('Upper Santa Cruz River', style="margin: 0;")),
-  tabPanel("Welcome",
-           br(),
-           h4("Welcome!", align = "center"),
-           br(),
-           h6("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Est pellentesque elit ullamcorper dignissim cras. Mauris pellentesque pulvinar pellentesque habitant morbi tristique senectus. Dui nunc mattis enim ut. In iaculis nunc sed augue lacus viverra vitae congue eu. Morbi tristique senectus et netus et. Ultrices eros in cursus turpis massa tincidunt dui ut. Turpis nunc eget lorem dolor sed viverra ipsum nunc. Facilisis sed odio morbi quis. Amet massa vitae tortor condimentum lacinia quis vel eros donec. Non quam lacus suspendisse faucibus interdum posuere. Tempus iaculis urna id volutpat lacus laoreet non curabitur. Pharetra massa massa ultricies mi quis hendrerit dolor magna. Faucibus et molestie ac feugiat sed lectus vestibulum mattis. Elementum nisi quis eleifend quam adipiscing. Accumsan tortor posuere ac ut. A lacus vestibulum sed arcu non odio euismod lacinia.", align = "center"),
-  ),
   tabPanel("Map",
+           h4("THIS APPLICATION IS STILL IN DEVELOPMENT", align = "center", style="color:red"),
           "This tool is intended to predict Escherichia coli (E. coli) levels
                in the Upper Santa Cruz River using a model trained on sampling data
                collected after the 2009 upgrade of the Nogales International Wastewater Treatment Plant.",
@@ -44,11 +39,25 @@ ui <- navbarPage(
       ),
       leaflet::leafletOutput("mymap")
 ),
-tabPanel("About us",
+tabPanel("Acknowledgements",
          br(),
-         h4("About us", align = "center"),
+         h4("Acknowledgements", align = "center"),
          br(),
-         h6("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Laoreet suspendisse interdum consectetur libero. Sollicitudin aliquam ultrices sagittis orci a scelerisque purus semper. Integer feugiat scelerisque varius morbi enim nunc faucibus a pellentesque. Ultrices sagittis orci a scelerisque. Aliquam etiam erat velit scelerisque in dictum non consectetur. Vestibulum lectus mauris ultrices eros in cursus turpis massa tincidunt. Pharetra magna ac placerat vestibulum lectus mauris ultrices eros. Varius quam quisque id diam vel quam elementum. Egestas tellus rutrum tellus pellentesque eu tincidunt tortor aliquam. Varius quam quisque id diam vel quam elementum pulvinar. Fermentum posuere urna nec tincidunt.", align = "center"),
+          h6("Thanks to Christian Roman Palacios (School of Information, University of Arizona) 
+            and Maliaca Oxnam (Data Science Institute, Univeristy of Arizona) for mentorship and assistance with 
+            data analysis and application creation.", align = "center"), 
+            
+          h6("Thanks to Jennifer Duan (University of Arizona) and Erfan Tousi (NextGen Engineering Inc) for sharing their comparable
+            study of irrigation water quality.", align = "center"),
+            
+          h6("Thanks to Salek Shafiqullah (National Park Service), Cheryl McIntyre (National Park Service), 
+            Kara Raymond (National Park Service), Meghan Smart (Arizona Department of Environmental Quality), 
+            Nicholas Paretti (United States Geological Survey) and Connie Williams (Friends of the Santa Cruz River)
+            for their expertise on water quality and sharing collected coliform data.", align = "center"),
+            
+          h6("This study would not be possible from the data collection performed by: 
+            National Park Service Sonoran Desert Network, Tumacácori National Historical Park, 
+            U.S. Geological Survey, Friends of the Santa Cruz, and Arizona Department of Environmental Quality.", align = "center")
 )
 )
 
