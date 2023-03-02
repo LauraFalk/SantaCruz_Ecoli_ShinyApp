@@ -14,52 +14,72 @@ ui <- navbarPage(
   tabPanel("Map",
            h4("THIS APPLICATION IS STILL IN DEVELOPMENT", align = "center", style="color:red"),
           "This tool is intended to predict Escherichia coli (E. coli) levels
-               in the Upper Santa Cruz River using a model trained on sampling data
-               collected after the 2009 upgrade of the Nogales International Wastewater Treatment Plant.",
-          br(), br(),
-          "Variables were as follows:",
-          tags$div(
-            tags$ul(
-              tags$li("PreviousTMin - Minimum temperature from 2 days prior from KA7WSB-1 weather station upload on ClimateAnalyzer.org"),
-              tags$li("Discharge_CFS - Current (within last 5 minute) discharge reading from the USGS gage 09481740,"),
-              tags$li("Stage - Categorical classification of current trend from USGS gage 09481740 (Low Flow, Base flow, High and Rising Flow, High and Falling Flow))"),
-              tags$li("NinXTS - Current (or most recent) Oceanic Nino Index from NOAA"),
-              tags$li("TOD - Categorical quartile classification of time of day,"),
-              tags$li("DistFromSonoita - Categorical distance classification from the Rio Sonoita Inputs"),
-              )
-          ),
+               in the Upper Santa Cruz River. Predictions are based off of public data sources
+          gathered from 2009-2022.",
+          br(),br(),
+          "While it may serve as a first warning of high bacterial loads likelihood; water quality
+          must still be verified using coliform testing procedures to ensure public safety.",
+          br(),
       h3("Current Conditions:", align = "center"
       ),
       fluidRow(
         column(12, align="center",
                tableOutput('table')
         )),
+      "For a more in-depth description of variables, please see the variables tab.",
       
       h3("Current predictions (", textOutput("currentTime", container = span), "):", align = "center"
       ),
       leaflet::leafletOutput("mymap")
 ),
+tabPanel("Variables",
+         h4("The variables used for model training and prediction are as follows:"),
+         br(),
+         h6("Previous_Air_Temperature_Celsius"),
+         "Minimum temperature from two days prior to current time from KA7WSB-1 
+                     weather station upload on ClimateAnalyzer.org. The two day lag is due to
+                     a two day publishing delay online. Model was traineed accordingly to 
+                     account for the lag time in the current predictions.",
+         h6("River_Discharge_CFS"),
+         "Current (within last 15 minute) discharge 
+                     reading in cubic feet per second from the USGS gage 09481740.",
+         h6("River_Stage_Category"),
+         "Categorical classification of current trend from 
+                     USGS gage 09481740 (Low Flow, Base flow, High and Rising Flow, 
+                     High and Falling Flow)). Categories are created using quantiles
+                     of the month's data (determines low, base or high) as well as difference
+                     from previous value in the cases of high flow (determines rise or fall).",
+         h6("El_Nino_Score"),
+         "Current (or most recent, due to monthly updates) of
+                     the Oceanic Nino Index from NOAA. See website for further information on
+                     this calculated value.",
+         h6("Time_Of_Day"),
+         "Categorical quartile classification of time of day (Morning, Afternoon, Evening, Night).",
+         h6("Distance_From_Sonoita"),
+         "Distance classification (roughly rounded to the nearest 1000m) from the Rio Sonoita Inputs, used for mapping."
+         ),
+
 tabPanel("Acknowledgements",
          br(),
          h4("Acknowledgements", align = "center"),
          br(),
-          h6("Thanks to Christian Roman Palacios (School of Information, University of Arizona) 
-            and Maliaca Oxnam (Data Science Institute, Univeristy of Arizona) for mentorship and assistance with 
-            data analysis and application creation.", align = "center"), 
-            
-          h6("Thanks to Jennifer Duan (University of Arizona) and Erfan Tousi (NextGen Engineering Inc) for sharing their comparable
-            study of irrigation water quality.", align = "center"),
-            
-          h6("Thanks to Salek Shafiqullah (National Park Service), Cheryl McIntyre (National Park Service), 
+         "This study would not be possible from the data collection performed by: 
+            National Park Service Sonoran Desert Network, Tumacacori National Historical Park, 
+            U.S. Geological Survey, Friends of the Santa Cruz, and Arizona Department of Environmental Quality.",
+         br(),br(),
+         "Thanks to Christian Roman Palacios (School of Information, University of Arizona) 
+            and Maliaca Oxnam (Data Science Institute, Univeristy of Arizona) for continuous mentorship, assistance and support with 
+            data analysis and application creation.",
+         br(),br(),
+         "Thanks to Jennifer Duan (University of Arizona) and Erfan Tousi (NextGen Engineering Inc) for sharing their completed work
+            in the prediction of irrigation water quality.",
+         br(),br(),
+         "Thanks to Salek Shafiqullah (National Park Service), Cheryl McIntyre (National Park Service), 
             Kara Raymond (National Park Service), Meghan Smart (Arizona Department of Environmental Quality), 
             Nicholas Paretti (United States Geological Survey) and Connie Williams (Friends of the Santa Cruz River)
-            for their expertise on water quality and sharing collected coliform data.", align = "center"),
-            
-          h6("This study would not be possible from the data collection performed by: 
-            National Park Service Sonoran Desert Network, Tumacácori National Historical Park, 
-            U.S. Geological Survey, Friends of the Santa Cruz, and Arizona Department of Environmental Quality.", align = "center")
-)
-)
+            for their expertise on water quality and sharing collected coliform data."
+         
+))
 
 
 

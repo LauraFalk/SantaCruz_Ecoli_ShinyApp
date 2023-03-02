@@ -24,9 +24,18 @@ predictionDF <- predictionDF %>%
   rename(DistFromSonoita = DistCatego) %>%
   select(PreviousTmin, Discharge_CFS, Stage, NinXTS, TOD, DistFromSonoita)
 
+
 DisplayDF <- predictionDF %>%
   select(-DistFromSonoita,-TOD)%>%
-  distinct()
+  distinct() %>%
+  rename(Previous_Air_Temperature_Celsius = PreviousTmin,
+         River_Discharge_CFS = Discharge_CFS,
+         River_Stage_Category = Stage,
+         El_Nino_Score = NinXTS) %>%
+  mutate(River_Stage_Category = ifelse(River_Stage_Category == 1, "Low Flow",
+                (ifelse(River_Stage_Category ==2,"Base Flow", 
+                 ifelse(River_Stage_Category == 3, "High Flow and Increasing",
+                        "High Flow and Decreasing")))))
 
 ## Run the model for 235
 XGBModel <- xgb.load('Data/XGBmodel235')
