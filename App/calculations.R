@@ -28,7 +28,7 @@ predictionDF <- predictionDF %>%
 DisplayDF <- predictionDF %>%
   select(-DistFromSonoita,-TOD)%>%
   distinct() %>%
-  rename(Previous_Air_Temperature_Celsius = PreviousTmin,
+  rename(Previous_Minimum_Air_Temperature_Celsius = PreviousTmin,
          River_Discharge_CFS = Discharge_CFS,
          River_Stage_Category = Stage,
          El_Nino_Score = NinXTS) %>%

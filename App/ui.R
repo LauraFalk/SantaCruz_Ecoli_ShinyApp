@@ -35,7 +35,7 @@ ui <- navbarPage(
 tabPanel("Variables",
          h4("The variables used for model training and prediction are as follows:"),
          br(),
-         h6("Previous_Air_Temperature_Celsius"),
+         h6("Previous_Minimum_Air_Temperature_Celsius"),
          "Minimum temperature from two days prior to current time from KA7WSB-1 
                      weather station upload on ClimateAnalyzer.org. The two day lag is due to
                      a two day publishing delay online. Model was traineed accordingly to 
@@ -71,8 +71,10 @@ tabPanel("Acknowledgements",
             and Maliaca Oxnam (Data Science Institute, Univeristy of Arizona) for continuous mentorship, assistance and support with 
             data analysis and application creation.",
          br(),br(),
-         "Thanks to Jennifer Duan (University of Arizona) and Erfan Tousi (NextGen Engineering Inc) for sharing their completed work
-            in the prediction of irrigation water quality.",
+         "Thanks to Jennifer Duan (University of Arizona) and Erfan Tousi (NextGen Engineering Inc) for sharing their completed work,",
+         tags$a(href="https://www.sciencedirect.com/science/article/abs/pii/S004896972104359X", "Evaluation of E. coli in sediment for assessing 
+                irrigation water quality using machine learning,"),
+         " from which the methods for this study were developed.",
          br(),br(),
          "Thanks to Salek Shafiqullah (National Park Service), Cheryl McIntyre (National Park Service), 
             Kara Raymond (National Park Service), Meghan Smart (Arizona Department of Environmental Quality), 
