@@ -11,7 +11,7 @@ library(dplyr)
 
 # T Min
 get.Tmin <- function(sysDate) {
-  formattedEndYear <- as.numeric(format(sysDate1, "%Y"))
+  formattedEndYear <- as.numeric(format(sysDate, "%Y"))
   TMin <- climateAnalyzeR::import_data("daily_wx"
                                        , station_id = 'KA7WSB-1'
                                        , start_year = formattedEndYear-1
@@ -20,7 +20,7 @@ get.Tmin <- function(sysDate) {
   
   Var_TMin <- as.numeric(unlist(TMin %>%
                                   mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
+                                  subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
                                   select(tmin_f)))
 }
 
@@ -28,10 +28,10 @@ Var_TMin <- get.Tmin(sysDate1)
 
 # Discharge
 get.DischargeCFS <- function(sysDate) {
-  startDate <- as.Date(format(sysDate1,'%Y-%m-%d')) - 31
-  endDate <- as.Date(format(sysDate1,'%Y-%m-%d')) - 1
+  startDate <- as.Date(format(as.Date(sysDate, tz = 'America/Phoenix'),'%Y-%m-%d')) - 1
+  endDate <- as.Date(format(as.Date(sysDate, tz = 'America/Phoenix'),'%Y-%m-%d'))
   USGSRaw <- readNWISuv(siteNumbers = '09481740', c('00060','00065'), startDate,endDate, tz = 'America/Phoenix')
-  
+
   tail(USGSRaw$X_00060_00000, n=1)
 }
 
@@ -39,12 +39,9 @@ Var_Discharge_CFS <- get.DischargeCFS(sysDate1)
 
 # Stage
 get.stage <- function(sysDate) {
-  startDate <- as.Date(format(sysDate1,'%Y-%m-%d')) - 31
-  endDate <- as.Date(format(sysDate1,'%Y-%m-%d')) - 1
+  startDate <- as.Date(format(as.Date(sysDate, tz = 'America/Phoenix'),'%Y-%m-%d')) - 1
+  endDate <- as.Date(format(as.Date(sysDate, tz = 'America/Phoenix'),'%Y-%m-%d'))
   USGSRaw <- readNWISuv(siteNumbers = '09481740', c('00060','00065'), startDate,endDate, tz = 'America/Phoenix')
-  
-  # Create quantiles for categorization
-  CFS_Quantiles<- quantile(USGSRaw$X_00060_00000, na.rm = TRUE)
   
   # Determine the difference between prior reading and current.
   USGSRaw <- USGSRaw %>% 
@@ -54,13 +51,13 @@ get.stage <- function(sysDate) {
   USGSRaw$DisDif2 <- ifelse(USGSRaw$DisDif>0,1,0)
   
   # Create a numeric classifier. 
-  # 1 = Low Flow, 2 = Base flow, 3 = High and Rising Flow 4 = High and Falling Flow
-  USGSRaw$Stage <- ifelse(USGSRaw$X_00060_00000 <=CFS_Quantiles[2], 1, 
-                          ifelse(USGSRaw$X_00060_00000 > CFS_Quantiles[2] & USGSRaw$X_00060_00000 <= CFS_Quantiles[4],2,
-                                 ifelse(USGSRaw$X_00060_00000 > CFS_Quantiles[4] & USGSRaw$DisDif2 == 1,3,
-                                        ifelse(USGSRaw$X_00060_00000 > CFS_Quantiles[4] & USGSRaw$DisDif2 == 0,4, NA))))
+  # 1 = Low Flow (<=25%), 2 = Base flow (<=75%), 3 = High and Rising Flow 4 = High and Falling Flow
+  USGSRaw$Stage <- ifelse(USGSRaw$X_00060_00000 <= 2.12, 1, 
+                          ifelse(USGSRaw$X_00060_00000 > 2.12 & USGSRaw$X_00060_00000 < 14.50 ,2,
+                                 ifelse(USGSRaw$X_00060_00000 > 14.50 & USGSRaw$DisDif2 == 1,3,
+                                        ifelse(USGSRaw$X_00060_00000 > 14.50 & USGSRaw$DisDif2 == 0,4, NA))))
   
-  
+
   # Create the stage variable.
   tail(USGSRaw$Stage, n=1)
 }
