@@ -30,7 +30,9 @@ ui <- navbarPage(
       
       h3("Current predictions (", textOutput("currentTime", container = span), "):", align = "center"
       ),
-      leaflet::leafletOutput("mymap")
+      leaflet::leafletOutput("mymap"),
+      "Predictions are measured in MPN (Most Probable Number) and based on the EPA SM9223 method of E. coli measurement.", align = "center"
+      
 ),
 tabPanel("Variables",
          h4("The variables used for model training and prediction are as follows:"),
