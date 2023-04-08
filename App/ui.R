@@ -65,8 +65,7 @@ tabPanel("Variables",
          tags$a("USGS Gage 09481740",
                 href="https://waterdata.usgs.gov/monitoring-location/09481740/#parameterCode=00060&period=P7D"),
                 " (Low Flow, Base flow, High and Rising Flow, 
-                     High and Falling Flow)). Categories are created using quantiles
-                     of the month's data (determines low, base or high) as well as difference
+                     High and Falling Flow)). Categories are based on quantile calculation from the training dataset. (determines low, base or high) as well as difference
                      from previous value in the cases of high flow (determines rise or fall).",
          h6("El_Nino_Score"),
          "Current (or most recent, due to monthly updates) of
