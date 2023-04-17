@@ -65,7 +65,7 @@ tabPanel("Variables",
          tags$a("USGS Gage 09481740",
                 href="https://waterdata.usgs.gov/monitoring-location/09481740/#parameterCode=00060&period=P7D"),
                 " (Low Flow, Base flow, High and Rising Flow, 
-                     High and Falling Flow)). Categories are based on quantile calculation from the training dataset. (determines low, base or high) as well as difference
+                     High and Falling Flow)). Categories are based on quantile calculation from the training dataset (determines low, base or high) as well as difference
                      from previous value in the cases of high flow (determines rise or fall).",
          h6("El_Nino_Score"),
          "Current (or most recent, due to monthly updates) of
@@ -115,7 +115,34 @@ tabPanel("Acknowledgements",
             Nicholas Paretti (United States Geological Survey) and Connie Williams (Friends of the Santa Cruz River)
             for their expertise on water quality and sharing collected coliform data."
          
-))
+),
+tabPanel("Code",
+         br(),
+         h4("Code", align = "center"),
+         br(),
+         "All code for this project is under a general public license available for download. Data was obtained from public data sources and 
+         included in the code repositories.",
+         br(),
+         br(),
+         "Shiny App code is located at ",
+         tags$a("https://github.com/LauraFalk/SantaCruz_Ecoli_ShinyApp",
+                href="https://github.com/LauraFalk/SantaCruz_Ecoli_ShinyApp"),
+         br(),
+         br(),
+         "The process for the creation of the machine learning algorithm was completed as a learning project under the Data Science Institute.
+         Raw data processing, model creation, and the raw data tables are located at ",
+         tags$a("https://github.com/LauraFalk/DSI_eColiProject",
+                href="https://github.com/LauraFalk/DSI_eColiProject"),
+         br(),
+         br(),
+         "Please report any bugs to the", tags$a("GitHub Issue Tracker", href="https://github.com/LauraFalk/SantaCruz_Ecoli_ShinyApp/issues"),
+         br(),
+         br(),
+         "Please direct any questions about this project to Laura Falk at palacila@arizona.edu"
+         
+         
+         )
+)
 
 
 

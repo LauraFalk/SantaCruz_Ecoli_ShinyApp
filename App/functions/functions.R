@@ -20,8 +20,12 @@ get.Tmin <- function(sysDate) {
   
   Var_TMin <- as.numeric(unlist(TMin %>%
                                   mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
+                                  subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
                                   select(tmin_f)))
+  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE, as.numeric(unlist(TMin %>%
+                                                                     mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
+                                                                     subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 3) %>%
+                                                                     select(tmin_f))),Var_TMin )
 }
 
 Var_TMin <- get.Tmin(sysDate1)

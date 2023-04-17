@@ -1,0 +1,13 @@
+name: SantaCruzRiver_EcoliPredictions
+title: SantaCruzRiver_EcoliPredictions
+username:
+account: palacila
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8448527
+bundleId: 6903496
+url: https://palacila.shinyapps.io/SantaCruzRiver_EcoliPredictions/
+when: 1677694041.03343
+lastSyncTime: 1677694041.03343
+asMultiple: FALSE
+asStatic: FALSE
