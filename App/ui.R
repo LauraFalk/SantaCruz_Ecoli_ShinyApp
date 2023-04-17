@@ -54,7 +54,7 @@ tabPanel("Variables",
                      tags$a("ClimateAnalyzer.org", href="http://www.climateanalyzer.us/raws/KA7WSB-1"),
                      ". The two day lag is due to
                      a two day publishing delay online. Model was traineed accordingly to 
-                     account for the lag time in the current predictions.",
+                     account for the lag time in the current predictions. If data is not available, data is populated with three days prior.",
          h6("River_Discharge_CFS"),
          "Current (within last 15 minute) discharge 
                      reading in cubic feet per second from the",

@@ -22,13 +22,35 @@ get.Tmin <- function(sysDate) {
                                   mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
                                   subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
                                   select(tmin_f)))
-  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE, as.numeric(unlist(TMin %>%
-                                                                     mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                                                     subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 3) %>%
-                                                                     select(tmin_f))),Var_TMin )
+  
+  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE | is.na(Var_TMin) == TRUE, 
+                     TMin %>% pull(tmin_f) %>% na.omit() %>% tail(1),
+                     Var_TMin)
 }
 
 Var_TMin <- get.Tmin(sysDate1)
+
+
+# T Min Flag
+get.Tmin.Flag <- function(sysDate) {
+  formattedEndYear <- as.numeric(format(sysDate, "%Y"))
+  TMin <- climateAnalyzeR::import_data("daily_wx"
+                                       , station_id = 'KA7WSB-1'
+                                       , start_year = formattedEndYear-1
+                                       , end_year = formattedEndYear
+                                       , station_type = 'RAWS')
+  
+  Var_TMin <- as.numeric(unlist(TMin %>%
+                                  mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
+                                  subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
+                                  select(tmin_f)))
+  
+  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE | is.na(Var_TMin) == TRUE, 
+                     "Temperature data missing, used last previous value",
+                     Var_TMin)
+}
+
+Var_TMin_Flag <- get.Tmin.Flag(sysDate1)
 
 # Discharge
 get.DischargeCFS <- function(sysDate) {
