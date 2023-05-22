@@ -20,10 +20,10 @@ get.Tmin <- function(sysDate) {
   
   Var_TMin <- as.numeric(unlist(TMin %>%
                                   mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
+                                  subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
                                   select(tmin_f)))
   
-  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE | is.na(Var_TMin) == TRUE, 
+  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE, 
                      TMin %>% pull(tmin_f) %>% na.omit() %>% tail(1),
                      Var_TMin)
 }
@@ -42,10 +42,10 @@ get.Tmin.Flag <- function(sysDate) {
   
   Var_TMin <- as.numeric(unlist(TMin %>%
                                   mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate1, tz = 'America/Phoenix') - 2) %>%
+                                  subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
                                   select(tmin_f)))
   
-  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE | is.na(Var_TMin) == TRUE, 
+  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE, 
                      "Temperature data missing, used last previous value",
                      Var_TMin)
 }
