@@ -101,7 +101,7 @@ tabPanel("Acknowledgements",
                 href="https://azdeq.gov/"),
             ".",
          br(),br(),
-         "Thanks to Christian Roman Palacios (School of Information, University of Arizona) 
+         "Thanks to Cristian Roman Palacios (School of Information, University of Arizona) 
             and Maliaca Oxnam (Data Science Institute, Univeristy of Arizona) for continuous mentorship, assistance and support with 
             data analysis and application creation.",
          br(),br(),
