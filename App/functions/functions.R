@@ -33,24 +33,34 @@ Var_TMin <- get.Tmin(sysDate1)
 
 # T Min Flag
 get.Tmin.Flag <- function(sysDate) {
-  formattedEndYear <- as.numeric(format(sysDate, "%Y"))
-  TMin <- climateAnalyzeR::import_data("daily_wx"
-                                       , station_id = 'KA7WSB-1'
-                                       , start_year = formattedEndYear-1
-                                       , end_year = formattedEndYear
-                                       , station_type = 'RAWS')
+  year <- as.numeric(format(sysDate, "%Y"))
   
-  Var_TMin <- as.numeric(unlist(TMin %>%
-                                  mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
-                                  select(tmin_f)))
+  latest <- climateAnalyzeR::import_data(
+    data_type = "daily_wx",
+    station_id = "KA7WSB-1",
+    start_year = year - 1,
+    end_year = year,
+    station_type = "RAWS"
+  ) %>%
+    tidyr::drop_na(tmin_f) %>%
+    dplyr::mutate(date_parsed = as.POSIXct(date, format = "%m/%d/%Y")) %>%
+    dplyr::filter(date_parsed == max(date_parsed)) %>%
+    dplyr::slice(1)
   
-  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE, 
-                     "Temperature data missing, used last previous value",
-                     Var_TMin)
+  list(
+    Tmin = as.numeric(latest$tmin_f),
+    Flag = if (latest$date_parsed == sysDate) {
+      "None"
+    } else {
+      paste0("Temperature data missing, used last known value on: ", latest$date_parsed)
+    }
+  )
 }
 
-Var_TMin_Flag <- get.Tmin.Flag(sysDate1)
+Tminresult <- get.Tmin.Flag(sysDate1)
+Var_TMin <- Tminresult$Tmin
+Var_TMin_Flag  <- Tminresult$Flag
+
 
 # Discharge
 get.DischargeCFS <- function(sysDate) {
@@ -91,70 +101,66 @@ get.stage <- function(sysDate) {
 Var_Stage <- get.stage(sysDate1)
 
 # El Nino
-get.NinXTS <- function(sysDate) {
-  formattedEndYear <- as.numeric(format(sysDate, "%Y"))
-  formattedMonth <- as.numeric(format(sysDate,"%m"))
+library(httr)
+
+get_latest_ONI_safe <- function(url = "https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/oni.ascii.txt") {
+  fallback_value <- -0.17
+  fallback_message <- "Nino data missing, used last known value on: July 2025"
   
-  # Bring in the website data
-  url <- "https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php"
+  result <- tryCatch({
+    # Make GET request with 10 second timeout
+    resp <- httr::GET(url, httr::timeout(5))
+    
+    # Check for HTTP errors
+    httr::stop_for_status(resp)
+    
+    # Extract content as text
+    content_text <- httr::content(resp, as = "text", encoding = "UTF-8")
+    
+    # Split text into lines
+    oni_data <- unlist(strsplit(content_text, "\n"))
+    
+    # Clean and filter data lines
+    oni_data <- oni_data[!grepl("^#", oni_data)]
+    oni_data <- oni_data[nzchar(oni_data)]
+    
+    # Parse table
+    oni_table <- read.table(text = oni_data, header = TRUE, fill = TRUE)
+    
+    # Get last row (most recent year)
+    last_row <- tail(oni_table, 1)
+    
+    # Extract ONI values (excluding year column)
+    oni_values <- as.numeric(last_row[ , -1])
+    
+    # Latest ONI = last non-NA value
+    latest_oni <- tail(oni_values[!is.na(oni_values)], 1)
+    
+    list(
+      oni = latest_oni,
+      flag = FALSE,
+      message = paste0("Latest ONI value successfully fetched: ", latest_oni)
+    )
+  }, error = function(e) {
+    # On error, return fallback value and flag
+    list(
+      oni = fallback_value,
+      flag = TRUE,
+      message = fallback_message
+    )
+  })
   
-  NinXTS <- url %>%
-    rvest::read_html()
-  
-  # Grab the data table
-  NinText <- rvest::html_table(rvest::html_nodes(NinXTS, xpath = './/table[4]//table[2]'))
-  
-  # Convert ONI index to dataframe
-  NinTable <- as.data.frame(NinText[1]) %>%
-    row_to_names(row_number = 1) %>%
-    mutate(Year = as.numeric(Year)) %>%
-    drop_na(Year)
-  
-  # I need to do either month-of or last non-na value to account for delays. 
-  formattedMonth <-12
-  
-  NinVal <- NinTable %>%
-    subset(2022 == Year) %>%
-    select(case_when(formattedMonth == 1 ~ "NDJ",
-                     formattedMonth == 2 ~ "DJF",
-                     formattedMonth == 3 ~ "JFM",
-                     formattedMonth == 4 ~ "FMA",
-                     formattedMonth == 5 ~ "MAM",
-                     formattedMonth == 6 ~ "AMJ",
-                     formattedMonth == 7 ~ "MJJ",
-                     formattedMonth == 8 ~ "JJA",
-                     formattedMonth == 9 ~ "JAS",
-                     formattedMonth == 10 ~ "ASO",
-                     formattedMonth == 11 ~ "SON",
-                     formattedMonth == 12 ~ "OND")) %>%
-    unlist()
-  
-  PrevVal <- NinTable %>%
-    subset(2022 == Year) %>%
-    select(case_when(formattedMonth == 2 ~ "NDJ",
-                     formattedMonth == 3 ~ "DJF",
-                     formattedMonth == 4 ~ "JFM",
-                     formattedMonth == 5 ~ "FMA",
-                     formattedMonth == 6 ~ "MAM",
-                     formattedMonth == 7 ~ "AMJ",
-                     formattedMonth == 8 ~ "MJJ",
-                     formattedMonth == 9 ~ "JJA",
-                     formattedMonth == 10 ~ "JAS",
-                     formattedMonth == 11 ~ "ASO",
-                     formattedMonth == 12 ~ "SON",
-                     formattedMonth == 1 ~ "OND")) %>%
-    unlist()
-  
-  if_else(!is.na(NinVal), NinVal, PrevVal)                 
+  return(result)
 }
 
-Var_NinXTS <- get.NinXTS(sysDate1)
-
+# Example usage:
+oni_res <- get_latest_ONI_safe()
+Var_NinXTS <- oni_res$oni
+Var_NinXTSFlag <- oni_res$message
 
 #modified from https://stackoverflow.com/questions/49370387/convert-time-object-to-categorical-morning-afternoon-evening-night-variable
 
 get.TOD <- function(sysTime) {
-  
   # Create categorical variables
   currenttime <- as.POSIXct(sysTime, format = "%H:%M") %>% format("%H:%M:%S")
   

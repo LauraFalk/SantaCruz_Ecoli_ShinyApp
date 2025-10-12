@@ -27,6 +27,9 @@ ui <- navbarPage(
         column(12, align="center",
                tableOutput('table')
         )),
+      em("Please note that certain data may be unavailable or incomplete. 
+          Every effort has been made to obtain the most accurate and up-to-date information available at the time of submission.
+          Data quality issues are noted at the right of the table."),
       em("For a more in-depth description of variables, please see the variables tab."),
       br(),
       br(),

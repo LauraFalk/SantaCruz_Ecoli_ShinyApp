@@ -19,7 +19,8 @@ predictionDF$Discharge_CFS	<- c(Var_Discharge_CFS)
 predictionDF$Stage	<- c(Var_Stage)
 predictionDF$NinXTS	<- c(Var_NinXTS)
 predictionDF$TOD <- c(Var_TOD)
-predictionDF$Flag <- c(Var_TMin_Flag)
+predictionDF$Flag1 <- c(Var_TMin_Flag)
+predictionDF$Flag2 <- c(Var_NinXTSFlag)
 
 FullDF <- predictionDF 
 
@@ -29,7 +30,7 @@ predictionDF <- FullDF %>%
 
 
 DisplayDF <- FullDF %>%
-  select(PreviousTmin, Discharge_CFS, Stage, NinXTS, TOD, Flag)%>%
+  select(PreviousTmin, Discharge_CFS, Stage, NinXTS, TOD, Flag1, Flag2)%>%
   distinct() %>%
   rename(Previous_Minimum_Air_Temperature_Celsius = PreviousTmin,
          River_Discharge_CFS = Discharge_CFS,
