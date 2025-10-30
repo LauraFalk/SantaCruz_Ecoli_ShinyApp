@@ -5,7 +5,7 @@ account: palacila
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8448799
-bundleId:
+bundleId: 11106185
 url: https://palacila.shinyapps.io/SantaCruz_Ecoli_ShinyApp/
 asMultiple: FALSE
 asStatic: FALSE
