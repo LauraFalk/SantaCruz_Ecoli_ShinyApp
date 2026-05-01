@@ -12,55 +12,54 @@ library(dplyr)
 # T Min
 get.Tmin <- function(sysDate) {
   formattedEndYear <- as.numeric(format(sysDate, "%Y"))
-  TMin <- climateAnalyzeR::import_data("daily_wx"
-                                       , station_id = 'KA7WSB-1'
-                                       , start_year = formattedEndYear-1
-                                       , end_year = formattedEndYear
-                                       , station_type = 'RAWS')
   
-  Var_TMin <- as.numeric(unlist(TMin %>%
-                                  mutate(DateasDate = as.POSIXct(TMin$date, format = "%m/%d/%Y")) %>%
-                                  subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
-                                  select(tmin_f)))
-  
-  Var_TMin <- ifelse(is_empty(Var_TMin) == TRUE | is.null(Var_TMin) == TRUE, 
-                     TMin %>% pull(tmin_f) %>% na.omit() %>% tail(1),
-                     Var_TMin)
-}
-
-Var_TMin <- get.Tmin(sysDate1)
-
-
-# T Min Flag
-get.Tmin.Flag <- function(sysDate) {
-  year <- as.numeric(format(sysDate, "%Y"))
-  
-  latest <- climateAnalyzeR::import_data(
-    data_type = "daily_wx",
-    station_id = "KA7WSB-1",
-    start_year = year - 1,
-    end_year = year,
-    station_type = "RAWS"
-  ) %>%
-    tidyr::drop_na(tmin_f) %>%
-    dplyr::mutate(date_parsed = as.POSIXct(date, format = "%m/%d/%Y")) %>%
-    dplyr::filter(date_parsed == max(date_parsed)) %>%
-    dplyr::slice(1)
-  
-  list(
-    Tmin = as.numeric(latest$tmin_f),
-    Flag = if (latest$date_parsed == sysDate) {
-      "None"
-    } else {
-      paste0("Temperature data missing, used last known value from: ", format(latest$date_parsed, '%m-%Y'))
-    }
+  TMin <- climateAnalyzeR::import_daily(
+    "daily_wx",
+    station_id = 'KA7WSB-1',
+    start_year = formattedEndYear - 1,
+    end_year = formattedEndYear,
+    station_type = 'RAWS'
   )
+  
+  Tmin_Flag <- NULL  # default
+  
+  if (ncol(TMin) > 1) {
+    Var_TMin <- as.numeric(unlist(
+      TMin %>%
+        mutate(DateasDate = as.POSIXct(date, format = "%m/%d/%Y")) %>%
+        subset(DateasDate == as.Date(sysDate, tz = 'America/Phoenix') - 2) %>%
+        select(tmin_f)
+    ))
+    
+  } else {
+    
+    TMin <- climateAnalyzeR::import_daily(
+      "daily_wx",
+      station_id = 'KA7WSB-1',
+      start_year = 2014,
+      end_year = as.numeric(format(sysDate, "%Y")),
+      station_type = 'RAWS'
+    )
+    
+    Var_TMin <- TMin %>%
+      select(date, tmin_f) %>%
+      drop_na() %>%
+      mutate(date = as.POSIXct(date, format = "%m/%d/%Y")) %>%
+      filter(month(date) == month(sysDate),
+             day(date) == day(sysDate)) %>%
+      summarise(mean_tmin = mean(tmin_f, na.rm = TRUE)) %>%
+      pull(mean_tmin)
+    
+    Tmin_Flag <- "Current data unavailable, used average temperature on this date for extent of record."
+  }
+  
+  return(list(
+    Var_TMin = Var_TMin,
+    Tmin_Flag = Tmin_Flag
+  ))
 }
-
-Tminresult <- get.Tmin.Flag(sysDate1)
-Var_TMin <- Tminresult$Tmin
-Var_TMin_Flag  <- Tminresult$Flag
-
+Var_TMin <- get.Tmin(sysDate1)$Var_TMin
+Var_TMin_Flag <- get.Tmin(sysDate1)$Tmin_Flag
 
 # Discharge
 get.DischargeCFS <- function(sysDate) {
