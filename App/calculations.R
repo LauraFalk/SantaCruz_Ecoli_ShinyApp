@@ -39,7 +39,8 @@ DisplayDF <- FullDF %>%
   mutate(River_Stage_Category = ifelse(River_Stage_Category == 1, "Low Flow",
                 (ifelse(River_Stage_Category ==2,"Base Flow", 
                  ifelse(River_Stage_Category == 3, "High Flow and Increasing",
-                        "High Flow and Decreasing")))))
+                        "High Flow and Decreasing"))))) %>%
+  remove_empty(which = "cols")
 
 ## Run the model for 235
 XGBModel <- xgb.load('Data/XGBmodel235')
