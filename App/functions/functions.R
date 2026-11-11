@@ -100,32 +100,60 @@ get.stage <- function(sysDate) {
 Var_Stage <- get.stage(sysDate1)
 
 # El Nino
-get.NinXTS <- function() {
-  fallback_value <- 2.46
-  fallback_flag  <- "Nino data missing, used last known value from: 11-2026"
+get.NinXTS <- function(sysDate = Sys.Date(), max_lag_months = 3) {
   
-  result <- tryCatch({
-    txt <- read_html("https://elninoguide.com/dashboard") %>% html_text2()
-    # Headline value, e.g. "Niño 3.4: +2.46°C" ("Ni.o" avoids ñ encoding issues)
-    value <- regmatches(txt, regexpr("Ni.o 3\\.4:\\s*[+-]?[0-9.]+", txt))
-    value <- as.numeric(sub(".*:\\s*", "", value))
+  # Last resort only, if the NOAA file itself can't be read
+  fallback_value <- 2.46
+  fallback_flag  <- "Nino data unavailable, used last known value from: 11-2026"
+  
+  # Position in this vector = the season's center month (DJF = 1, ... NDJ = 12)
+  seasons <- c("DJF", "JFM", "FMA", "MAM", "AMJ", "MJJ",
+               "JJA", "JAS", "ASO", "SON", "OND", "NDJ")
+  
+  tryCatch({
     
-    if (length(value) != 1 || is.na(value)) stop("Value not found on page")
+    oni <- read.table(
+      "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
+      header = TRUE, stringsAsFactors = FALSE
+    )
     
-    list(oni = value, flag = NA_character_)
+    # Latest row with a valid value
+    oni <- oni[!is.na(oni$ANOM) & oni$SEAS %in% seasons, ]
+    if (nrow(oni) == 0) stop("No valid rows in NOAA file")
+    last <- oni[nrow(oni), ]
+    
+    # Attribute a date: the last month of the 3-month season
+    # (e.g. ASO 2026 -> 10-2026; NDJ 2026 -> 01-2027)
+    center_date <- as.Date(sprintf("%d-%02d-01", last$YR, match(last$SEAS, seasons)))
+    end_date    <- seq(center_date, by = "month", length.out = 2)[2]
+    end_label   <- format(end_date, "%m-%Y")
+    
+    # Compare to system date (whole months)
+    ym  <- function(d) as.numeric(format(d, "%Y")) * 12 + as.numeric(format(d, "%m"))
+    lag <- ym(sysDate) - ym(end_date)
+    
+    if (lag <= max_lag_months) {
+      flag <- NA_character_              # usable, no flag
+    } else {
+      flag <- paste0("Nino data stale (", lag, " months old), ",
+                     "used last known value from: ", end_label,
+                     " (", last$SEAS, " ", last$YR, ")")
+    }
+    
+    list(oni = as.numeric(last$ANOM), flag = flag,
+         period = paste(last$SEAS, last$YR), date = end_date)
     
   }, error = function(e) {
-    list(oni = fallback_value, flag = fallback_flag)
+    message("get.NinXTS failed: ", conditionMessage(e))
+    list(oni = fallback_value, flag = fallback_flag,
+         period = NA_character_, date = NA)
   })
-  
-  return(result)
 }
 
 # Example usage:
-oni_res        <- get.NinXTS()
+oni_res        <- get.NinXTS(sysDate1)
 Var_NinXTS     <- oni_res$oni
 Var_NinXTSFlag <- oni_res$flag
-
 #modified from https://stackoverflow.com/questions/49370387/convert-time-object-to-categorical-morning-afternoon-evening-night-variable
 
 get.TOD <- function(sysTime) {
